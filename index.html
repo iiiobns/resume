@@ -224,7 +224,6 @@
             font-family: var(--font-family);
             transition: all 0.3s;
         }
-        /* 经典模板（默认） */
         .resume.template-classic header {
             text-align: center;
             margin-bottom: 8mm;
@@ -242,7 +241,6 @@
             margin: var(--section-margin);
         }
 
-        /* 现代模板 */
         .resume.template-modern {
             display: flex;
             padding: 0;
@@ -283,10 +281,7 @@
             border: 3px solid white;
         }
 
-        /* 极简模板 */
-        .resume.template-minimal header {
-            margin-bottom: 8mm;
-        }
+        .resume.template-minimal header { margin-bottom: 8mm; }
         .resume.template-minimal header h1 {
             font-size: var(--font-size-name);
             font-weight: 300;
@@ -326,7 +321,6 @@
             font-size: 9.5pt;
         }
 
-        /* 分享模式：隐藏编辑器 */
         body.share-mode .editor { display: none; }
         body.share-mode .preview { overflow: visible; padding: 30px; }
 
@@ -340,10 +334,7 @@
 </head>
 <body>
 
-<!-- 编辑面板 -->
 <div class="editor" id="editor">
-
-    <!-- 简历管理 -->
     <div class="resume-manager">
         <label style="font-weight:600;font-size:13px;">📂 简历管理</label>
         <select id="resume-select"></select>
@@ -353,8 +344,6 @@
             <button id="delete-resume-btn">删除</button>
         </div>
     </div>
-
-    <!-- 模板与字体 -->
     <div style="display:flex;gap:8px;margin-bottom:10px;">
         <div style="flex:1;">
             <label style="font-size:13px;font-weight:600;">🎨 模板</label>
@@ -373,35 +362,28 @@
             </select>
         </div>
     </div>
-
-    <!-- 照片上传 -->
     <div class="photo-upload">
         <img id="photo-preview-thumb" src="" alt="头像" style="display:none;">
         <input type="file" id="photo-input" accept="image/*">
     </div>
-
     <h3>📌 基本信息</h3>
     <div class="form-group"><label>姓名</label><input id="name" placeholder="张三"></div>
     <div class="form-group"><label>期望职位</label><input id="title" placeholder="前端工程师"></div>
     <div class="form-group"><label>邮箱</label><input id="email" placeholder="zhang@example.com"></div>
     <div class="form-group"><label>电话</label><input id="phone" placeholder="13800000000"></div>
     <div class="form-group"><label>个人简介</label><textarea id="summary" rows="3" placeholder="一句话介绍自己..."></textarea></div>
-
     <h3>💼 工作经历</h3>
     <div class="dynamic-list" id="work-list"></div>
     <button class="add-btn" id="add-work">+ 添加工作经历</button>
-
     <h3>🎓 教育背景</h3>
     <div class="dynamic-list" id="edu-list"></div>
     <button class="add-btn" id="add-edu">+ 添加教育经历</button>
-
     <h3>🛠️ 技能</h3>
     <div class="skills-input-container">
         <input id="skill-input" placeholder="输入技能后回车添加">
         <button class="add-btn" id="add-skill-btn" style="padding: 8px 12px;">添加</button>
     </div>
     <div class="skill-tag-list" id="skill-tags"></div>
-
     <div class="actions">
         <button class="btn-primary" id="export-pdf">📄 导出 PDF</button>
         <button class="btn-success" id="share-link-btn">🔗 复制分享链接</button>
@@ -409,18 +391,13 @@
     </div>
 </div>
 
-<!-- 预览面板 -->
 <div class="preview" id="preview">
-    <div class="resume template-classic" id="resume-preview">
-        <!-- 动态渲染预览 -->
-    </div>
+    <div class="resume template-classic" id="resume-preview"></div>
 </div>
 
 <script>
-    // ==================== 全局数据管理 ====================
     const STORAGE_KEY = 'webresume_pro_data';
     const CURRENT_KEY = 'webresume_pro_current';
-
     let allResumes = {};
     let currentResumeName = '默认简历';
     let data;
@@ -428,26 +405,16 @@
 
     function loadAllResumes() {
         const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            try { allResumes = JSON.parse(saved); } catch(e) { allResumes = {}; }
-        }
+        if (saved) { try { allResumes = JSON.parse(saved); } catch(e) { allResumes = {}; } }
         if (Object.keys(allResumes).length === 0) {
             allResumes['默认简历'] = {
                 settings: { template: 'classic', font: 'sans', photo: '' },
-                data: {
-                    basics: { name: '', title: '', email: '', phone: '', summary: '' },
-                    work: [],
-                    education: [],
-                    skills: []
-                }
+                data: { basics: { name: '', title: '', email: '', phone: '', summary: '' }, work: [], education: [], skills: [] }
             };
         }
         const cur = localStorage.getItem(CURRENT_KEY);
-        if (cur && allResumes[cur]) {
-            currentResumeName = cur;
-        } else {
-            currentResumeName = Object.keys(allResumes)[0];
-        }
+        if (cur && allResumes[cur]) { currentResumeName = cur; }
+        else { currentResumeName = Object.keys(allResumes)[0]; }
         switchToResume(currentResumeName);
     }
 
@@ -478,194 +445,96 @@
         select.innerHTML = '';
         Object.keys(allResumes).forEach(name => {
             const option = document.createElement('option');
-            option.value = name;
-            option.textContent = name;
+            option.value = name; option.textContent = name;
             if (name === currentResumeName) option.selected = true;
             select.appendChild(option);
         });
     }
 
-    // ==================== DOM 元素 ====================
     const els = {
-        name: document.getElementById('name'),
-        title: document.getElementById('title'),
-        email: document.getElementById('email'),
-        phone: document.getElementById('phone'),
-        summary: document.getElementById('summary'),
-        workList: document.getElementById('work-list'),
-        eduList: document.getElementById('edu-list'),
-        skillInput: document.getElementById('skill-input'),
-        skillTags: document.getElementById('skill-tags'),
-        addSkillBtn: document.getElementById('add-skill-btn'),
-        addWork: document.getElementById('add-work'),
-        addEdu: document.getElementById('add-edu'),
-        exportPdf: document.getElementById('export-pdf'),
-        shareLinkBtn: document.getElementById('share-link-btn'),
-        resetBtn: document.getElementById('reset-btn'),
-        templateSelect: document.getElementById('template-select'),
-        fontSelect: document.getElementById('font-select'),
-        photoInput: document.getElementById('photo-input'),
-        photoPreviewThumb: document.getElementById('photo-preview-thumb'),
-        resumeSelect: document.getElementById('resume-select'),
-        newBtn: document.getElementById('new-resume-btn'),
-        renameBtn: document.getElementById('rename-resume-btn'),
-        deleteBtn: document.getElementById('delete-resume-btn'),
-        resumePreview: document.getElementById('resume-preview')
+        name: document.getElementById('name'), title: document.getElementById('title'),
+        email: document.getElementById('email'), phone: document.getElementById('phone'),
+        summary: document.getElementById('summary'), workList: document.getElementById('work-list'),
+        eduList: document.getElementById('edu-list'), skillInput: document.getElementById('skill-input'),
+        skillTags: document.getElementById('skill-tags'), addSkillBtn: document.getElementById('add-skill-btn'),
+        addWork: document.getElementById('add-work'), addEdu: document.getElementById('add-edu'),
+        exportPdf: document.getElementById('export-pdf'), shareLinkBtn: document.getElementById('share-link-btn'),
+        resetBtn: document.getElementById('reset-btn'), templateSelect: document.getElementById('template-select'),
+        fontSelect: document.getElementById('font-select'), photoInput: document.getElementById('photo-input'),
+        photoPreviewThumb: document.getElementById('photo-preview-thumb'), resumeSelect: document.getElementById('resume-select'),
+        newBtn: document.getElementById('new-resume-btn'), renameBtn: document.getElementById('rename-resume-btn'),
+        deleteBtn: document.getElementById('delete-resume-btn'), resumePreview: document.getElementById('resume-preview')
     };
 
-    // ==================== 照片处理 ====================
     function updatePhotoDisplay() {
-        if (settings.photo) {
-            els.photoPreviewThumb.src = settings.photo;
-            els.photoPreviewThumb.style.display = 'block';
-        } else {
-            els.photoPreviewThumb.style.display = 'none';
-        }
+        if (settings.photo) { els.photoPreviewThumb.src = settings.photo; els.photoPreviewThumb.style.display = 'block'; }
+        else { els.photoPreviewThumb.style.display = 'none'; }
     }
 
     els.photoInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
+        const file = e.target.files[0]; if (!file) return;
         const reader = new FileReader();
-        reader.onload = function(ev) {
-            settings.photo = ev.target.result;
-            updatePhotoDisplay();
-            updatePreview();
-            saveAllResumes();
-        };
+        reader.onload = function(ev) { settings.photo = ev.target.result; updatePhotoDisplay(); updatePreview(); saveAllResumes(); };
         reader.readAsDataURL(file);
     });
 
-    // ==================== 表单同步 ====================
     function syncFormFromData() {
-        els.name.value = data.basics.name || '';
-        els.title.value = data.basics.title || '';
-        els.email.value = data.basics.email || '';
-        els.phone.value = data.basics.phone || '';
+        els.name.value = data.basics.name || ''; els.title.value = data.basics.title || '';
+        els.email.value = data.basics.email || ''; els.phone.value = data.basics.phone || '';
         els.summary.value = data.basics.summary || '';
     }
 
     function syncDataFromForm() {
-        data.basics.name = els.name.value;
-        data.basics.title = els.title.value;
-        data.basics.email = els.email.value;
-        data.basics.phone = els.phone.value;
+        data.basics.name = els.name.value; data.basics.title = els.title.value;
+        data.basics.email = els.email.value; data.basics.phone = els.phone.value;
         data.basics.summary = els.summary.value;
     }
 
-    // ==================== 预览更新 ====================
     function updatePreview() {
         const template = settings.template || 'classic';
         const font = settings.font || 'sans';
         const previewDiv = els.resumePreview;
         previewDiv.className = 'resume template-' + template;
-
         let fontFamily;
-        if (font === 'serif') {
-            fontFamily = '"Noto Serif SC", "Times New Roman", "宋体", SimSun, serif';
-        } else if (font === 'mono') {
-            fontFamily = '"Fira Code", "Courier New", "Source Code Pro", monospace';
-        } else {
-            fontFamily = '"Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
-        }
+        if (font === 'serif') fontFamily = '"Noto Serif SC", "Times New Roman", "宋体", SimSun, serif';
+        else if (font === 'mono') fontFamily = '"Fira Code", "Courier New", "Source Code Pro", monospace';
+        else fontFamily = '"Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
         previewDiv.style.fontFamily = fontFamily;
 
-        const photoHTML = settings.photo ? `<img src="${settings.photo}" class="photo-large" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">` : '';
+        const photoHTML = settings.photo ? `<img src="${settings.photo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">` : '';
         const name = data.basics.name || '姓名';
         const title = data.basics.title || '职位';
         const email = data.basics.email ? `📧 ${data.basics.email}` : '';
         const phone = data.basics.phone ? `📱 ${data.basics.phone}` : '';
         const summary = data.basics.summary || '';
 
-        let workHTML = '';
+        let workHTML = ''; let eduHTML = ''; let skillsHTML = '';
         if (data.work.length) {
             workHTML += '<h2>工作经历</h2>';
-            data.work.forEach(job => {
-                workHTML += `<div class="item">
-                    <div class="item-header">
-                        <div class="left"><strong>${job.company || ''}</strong><span class="position">${job.position || ''}</span></div>
-                        <div class="right">${job.start || ''} - ${job.end || ''}</div>
-                    </div>
-                    ${job.description ? `<div class="item-desc">${job.description}</div>` : ''}
-                </div>`;
-            });
+            data.work.forEach(job => { workHTML += `<div class="item"><div class="item-header"><div class="left"><strong>${job.company||''}</strong><span class="position">${job.position||''}</span></div><div class="right">${job.start||''} - ${job.end||''}</div></div>${job.description?`<div class="item-desc">${job.description}</div>`:''}</div>`; });
         }
-
-        let eduHTML = '';
         if (data.education.length) {
             eduHTML += '<h2>教育背景</h2>';
-            data.education.forEach(edu => {
-                eduHTML += `<div class="item">
-                    <div class="item-header">
-                        <div class="left"><strong>${edu.school || ''}</strong><span class="position">${edu.major || ''} · ${edu.degree || ''}</span></div>
-                        <div class="right">${edu.start || ''} - ${edu.end || ''}</div>
-                    </div>
-                </div>`;
-            });
+            data.education.forEach(edu => { eduHTML += `<div class="item"><div class="item-header"><div class="left"><strong>${edu.school||''}</strong><span class="position">${edu.major||''} · ${edu.degree||''}</span></div><div class="right">${edu.start||''} - ${edu.end||''}</div></div></div>`; });
         }
-
-        let skillsHTML = '';
         if (data.skills.length) {
             skillsHTML += '<h2>技能</h2><div class="skills">';
-            data.skills.forEach(skill => {
-                skillsHTML += `<span class="skill-tag">${skill}</span>`;
-            });
+            data.skills.forEach(skill => { skillsHTML += `<span class="skill-tag">${skill}</span>`; });
             skillsHTML += '</div>';
         }
 
         if (template === 'modern') {
-            previewDiv.innerHTML = `
-                <div class="sidebar">
-                    ${photoHTML ? `<div style="text-align:center;">${photoHTML}</div>` : ''}
-                    <div>
-                        <h2 style="color:white;">联系方式</h2>
-                        <p style="font-size:10pt;">${email}</p>
-                        <p style="font-size:10pt;">${phone}</p>
-                    </div>
-                    ${skillsHTML.replace('<h2>技能</h2>', '<h2 style="color:white;">技能</h2>')}
-                </div>
-                <div class="main">
-                    <header style="text-align:left;border-bottom:none;margin-bottom:5mm;">
-                        <h1 style="color:white;background:var(--primary);display:inline-block;padding:4px 12px;">${name}</h1>
-                        <div class="title" style="margin-top:2mm;">${title}</div>
-                    </header>
-                    ${summary ? `<div class="summary">${summary}</div>` : ''}
-                    ${workHTML}
-                    ${eduHTML}
-                </div>
-            `;
+            previewDiv.innerHTML = `<div class="sidebar">${photoHTML?`<div style="text-align:center;">${photoHTML}</div>`:''}<div><h2 style="color:white;">联系方式</h2><p style="font-size:10pt;">${email}</p><p style="font-size:10pt;">${phone}</p></div>${skillsHTML.replace('<h2>技能</h2>','<h2 style="color:white;">技能</h2>')}</div><div class="main"><header style="text-align:left;border-bottom:none;margin-bottom:5mm;"><h1 style="color:white;background:var(--primary);display:inline-block;padding:4px 12px;">${name}</h1><div class="title" style="margin-top:2mm;">${title}</div></header>${summary?`<div class="summary">${summary}</div>`:''}${workHTML}${eduHTML}</div>`;
         } else {
-            previewDiv.innerHTML = `
-                <header>
-                    ${photoHTML ? `<div style="text-align:center;margin-bottom:4mm;">${photoHTML}</div>` : ''}
-                    <h1>${name}</h1>
-                    <div class="title">${title}</div>
-                    <div class="contact">${email} ${phone}</div>
-                </header>
-                ${summary ? `<div class="summary">${summary}</div>` : ''}
-                ${workHTML}
-                ${eduHTML}
-                ${skillsHTML}
-            `;
+            previewDiv.innerHTML = `<header>${photoHTML?`<div style="text-align:center;margin-bottom:4mm;">${photoHTML}</div>`:''}<h1>${name}</h1><div class="title">${title}</div><div class="contact">${email} ${phone}</div></header>${summary?`<div class="summary">${summary}</div>`:''}${workHTML}${eduHTML}${skillsHTML}`;
         }
     }
 
-    // ==================== 动态列表 ====================
     function renderWorkList() {
         els.workList.innerHTML = '';
         data.work.forEach((job, index) => {
-            const div = document.createElement('div');
-            div.className = 'list-item';
-            div.innerHTML = `
-                <button class="remove-btn" data-index="${index}" data-type="work">✕</button>
-                <div class="form-group"><label>公司</label><input class="work-company" value="${job.company || ''}" data-index="${index}"></div>
-                <div class="form-group"><label>职位</label><input class="work-position" value="${job.position || ''}" data-index="${index}"></div>
-                <div style="display:flex; gap:8px;">
-                    <div class="form-group" style="flex:1;"><label>开始</label><input class="work-start" value="${job.start || ''}" data-index="${index}" placeholder="2022.03"></div>
-                    <div class="form-group" style="flex:1;"><label>结束</label><input class="work-end" value="${job.end || ''}" data-index="${index}" placeholder="至今"></div>
-                </div>
-                <div class="form-group"><label>描述</label><textarea class="work-desc" data-index="${index}" rows="2">${job.description || ''}</textarea></div>
-            `;
+            const div = document.createElement('div'); div.className = 'list-item';
+            div.innerHTML = `<button class="remove-btn" data-index="${index}" data-type="work">✕</button><div class="form-group"><label>公司</label><input class="work-company" value="${job.company||''}" data-index="${index}"></div><div class="form-group"><label>职位</label><input class="work-position" value="${job.position||''}" data-index="${index}"></div><div style="display:flex;gap:8px;"><div class="form-group" style="flex:1;"><label>开始</label><input class="work-start" value="${job.start||''}" data-index="${index}" placeholder="2022.03"></div><div class="form-group" style="flex:1;"><label>结束</label><input class="work-end" value="${job.end||''}" data-index="${index}" placeholder="至今"></div></div><div class="form-group"><label>描述</label><textarea class="work-desc" data-index="${index}" rows="2">${job.description||''}</textarea></div>`;
             els.workList.appendChild(div);
         });
         attachWorkListeners();
@@ -674,18 +543,8 @@
     function renderEduList() {
         els.eduList.innerHTML = '';
         data.education.forEach((edu, index) => {
-            const div = document.createElement('div');
-            div.className = 'list-item';
-            div.innerHTML = `
-                <button class="remove-btn" data-index="${index}" data-type="edu">✕</button>
-                <div class="form-group"><label>学校</label><input class="edu-school" value="${edu.school || ''}" data-index="${index}"></div>
-                <div class="form-group"><label>学位</label><input class="edu-degree" value="${edu.degree || ''}" data-index="${index}" placeholder="本科"></div>
-                <div class="form-group"><label>专业</label><input class="edu-major" value="${edu.major || ''}" data-index="${index}"></div>
-                <div style="display:flex; gap:8px;">
-                    <div class="form-group" style="flex:1;"><label>开始</label><input class="edu-start" value="${edu.start || ''}" data-index="${index}" placeholder="2018"></div>
-                    <div class="form-group" style="flex:1;"><label>结束</label><input class="edu-end" value="${edu.end || ''}" data-index="${index}" placeholder="2022"></div>
-                </div>
-            `;
+            const div = document.createElement('div'); div.className = 'list-item';
+            div.innerHTML = `<button class="remove-btn" data-index="${index}" data-type="edu">✕</button><div class="form-group"><label>学校</label><input class="edu-school" value="${edu.school||''}" data-index="${index}"></div><div class="form-group"><label>学位</label><input class="edu-degree" value="${edu.degree||''}" data-index="${index}" placeholder="本科"></div><div class="form-group"><label>专业</label><input class="edu-major" value="${edu.major||''}" data-index="${index}"></div><div style="display:flex;gap:8px;"><div class="form-group" style="flex:1;"><label>开始</label><input class="edu-start" value="${edu.start||''}" data-index="${index}" placeholder="2018"></div><div class="form-group" style="flex:1;"><label>结束</label><input class="edu-end" value="${edu.end||''}" data-index="${index}" placeholder="2022"></div></div>`;
             els.eduList.appendChild(div);
         });
         attachEduListeners();
@@ -693,87 +552,49 @@
 
     function attachWorkListeners() {
         document.querySelectorAll('.work-company, .work-position, .work-start, .work-end, .work-desc').forEach(input => {
-            input.addEventListener('input', function() {
-                const idx = parseInt(this.dataset.index);
-                const field = this.className.replace('work-', '');
-                data.work[idx][field] = this.value;
-                saveAllResumes();
-                updatePreview();
-            });
+            input.addEventListener('input', function() { const idx = parseInt(this.dataset.index); const field = this.className.replace('work-', ''); data.work[idx][field] = this.value; saveAllResumes(); updatePreview(); });
         });
     }
 
     function attachEduListeners() {
         document.querySelectorAll('.edu-school, .edu-degree, .edu-major, .edu-start, .edu-end').forEach(input => {
-            input.addEventListener('input', function() {
-                const idx = parseInt(this.dataset.index);
-                const field = this.className.replace('edu-', '');
-                data.education[idx][field] = this.value;
-                saveAllResumes();
-                updatePreview();
-            });
+            input.addEventListener('input', function() { const idx = parseInt(this.dataset.index); const field = this.className.replace('edu-', ''); data.education[idx][field] = this.value; saveAllResumes(); updatePreview(); });
         });
     }
 
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('remove-btn')) {
-            const type = e.target.dataset.type;
-            const index = parseInt(e.target.dataset.index);
-            if (type === 'work') {
-                data.work.splice(index, 1);
-                renderWorkList();
-            } else if (type === 'edu') {
-                data.education.splice(index, 1);
-                renderEduList();
-            }
-            saveAllResumes();
-            updatePreview();
+            const type = e.target.dataset.type; const index = parseInt(e.target.dataset.index);
+            if (type === 'work') { data.work.splice(index, 1); renderWorkList(); }
+            else if (type === 'edu') { data.education.splice(index, 1); renderEduList(); }
+            saveAllResumes(); updatePreview();
         }
     });
 
-    // ==================== 技能标签 ====================
     function renderSkillTags() {
         els.skillTags.innerHTML = '';
         data.skills.forEach((skill, index) => {
-            const span = document.createElement('span');
-            span.className = 'skill-tag-item';
+            const span = document.createElement('span'); span.className = 'skill-tag-item';
             span.innerHTML = `${skill} <button data-index="${index}">✕</button>`;
             els.skillTags.appendChild(span);
         });
         els.skillTags.querySelectorAll('button').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const idx = parseInt(this.dataset.index);
-                data.skills.splice(idx, 1);
-                renderSkillTags();
-                saveAllResumes();
-                updatePreview();
-            });
+            btn.addEventListener('click', function(e) { e.stopPropagation(); const idx = parseInt(this.dataset.index); data.skills.splice(idx, 1); renderSkillTags(); saveAllResumes(); updatePreview(); });
         });
     }
 
     function addSkill(skillText) {
         const skill = skillText.trim();
-        if (skill && !data.skills.includes(skill)) {
-            data.skills.push(skill);
-            renderSkillTags();
-            saveAllResumes();
-            updatePreview();
-        }
+        if (skill && !data.skills.includes(skill)) { data.skills.push(skill); renderSkillTags(); saveAllResumes(); updatePreview(); }
         els.skillInput.value = '';
     }
 
-    // ==================== 分享链接生成 ====================
+    // ============ 核心修复：编码/解码一致性 ============
     function generateShareLink() {
-        const exportObj = {
-            settings: settings,
-            data: data
-        };
+        const exportObj = { settings: settings, data: data };
         const jsonStr = JSON.stringify(exportObj);
-        // 编码处理（支持中文和特殊字符）
-        const base64 = btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g,
-            function(m, p) { return String.fromCharCode('0x' + p); }
-        ));
+        // 统一使用 encodeURIComponent + btoa
+        const base64 = btoa(encodeURIComponent(jsonStr));
         const url = new URL(window.location);
         url.hash = 'data=' + base64;
         return url.toString();
@@ -784,9 +605,8 @@
         if (hash.startsWith('#data=')) {
             const base64 = hash.substring(6);
             try {
-                const jsonStr = decodeURIComponent(atob(base64).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
+                // 解码：atob → decodeURIComponent
+                const jsonStr = decodeURIComponent(atob(base64));
                 const imported = JSON.parse(jsonStr);
                 if (imported.settings && imported.data) {
                     document.body.classList.add('share-mode');
@@ -795,154 +615,62 @@
                     updatePreview();
                 }
             } catch(e) {
-                console.warn('无法解析分享链接数据');
+                console.warn('无法解析分享链接', e);
             }
         }
     }
 
-    // ==================== 事件绑定 ====================
     function init() {
-        // 检查是否是分享链接
         if (window.location.hash.startsWith('#data=')) {
             parseShareLink();
-            return; // 分享模式下不初始化编辑器
+            return;
         }
 
         loadAllResumes();
 
-        // 基本信息输入同步
         ['name','title','email','phone','summary'].forEach(field => {
-            els[field].addEventListener('input', () => {
-                syncDataFromForm();
-                saveAllResumes();
-                updatePreview();
-            });
+            els[field].addEventListener('input', () => { syncDataFromForm(); saveAllResumes(); updatePreview(); });
         });
 
-        // 模板切换
-        els.templateSelect.addEventListener('change', () => {
-            settings.template = els.templateSelect.value;
-            updatePreview();
-            saveAllResumes();
-        });
+        els.templateSelect.addEventListener('change', () => { settings.template = els.templateSelect.value; updatePreview(); saveAllResumes(); });
+        els.fontSelect.addEventListener('change', () => { settings.font = els.fontSelect.value; updatePreview(); saveAllResumes(); });
 
-        // 字体切换
-        els.fontSelect.addEventListener('change', () => {
-            settings.font = els.fontSelect.value;
-            updatePreview();
-            saveAllResumes();
-        });
+        els.addWork.addEventListener('click', () => { data.work.push({ company: '', position: '', start: '', end: '', description: '' }); renderWorkList(); saveAllResumes(); updatePreview(); });
+        els.addEdu.addEventListener('click', () => { data.education.push({ school: '', degree: '', major: '', start: '', end: '' }); renderEduList(); saveAllResumes(); updatePreview(); });
 
-        // 添加工作/教育
-        els.addWork.addEventListener('click', () => {
-            data.work.push({ company: '', position: '', start: '', end: '', description: '' });
-            renderWorkList();
-            saveAllResumes();
-            updatePreview();
-        });
-        els.addEdu.addEventListener('click', () => {
-            data.education.push({ school: '', degree: '', major: '', start: '', end: '' });
-            renderEduList();
-            saveAllResumes();
-            updatePreview();
-        });
-
-        // 技能添加
         els.addSkillBtn.addEventListener('click', () => addSkill(els.skillInput.value));
-        els.skillInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                addSkill(els.skillInput.value);
-            }
-        });
+        els.skillInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); addSkill(els.skillInput.value); } });
 
-        // 导出 PDF
-        els.exportPdf.addEventListener('click', () => {
-            window.print();
-        });
+        els.exportPdf.addEventListener('click', () => { window.print(); });
 
-        // 复制分享链接
         els.shareLinkBtn.addEventListener('click', async () => {
             const link = generateShareLink();
-            try {
-                await navigator.clipboard.writeText(link);
-                alert('✅ 分享链接已复制到剪贴板！\n发送给导师或自己保存，打开即可看到简历。');
-            } catch {
-                prompt('请手动复制以下链接：', link);
-            }
+            try { await navigator.clipboard.writeText(link); alert('✅ 分享链接已复制！'); }
+            catch { prompt('手动复制：', link); }
         });
 
-        // 重置当前简历
         els.resetBtn.addEventListener('click', () => {
-            if (confirm('确定要清空当前简历的所有内容吗？')) {
+            if (confirm('清空当前简历？')) {
                 data.basics = { name: '', title: '', email: '', phone: '', summary: '' };
-                data.work = [];
-                data.education = [];
-                data.skills = [];
-                settings.photo = '';
-                syncFormFromData();
-                renderWorkList();
-                renderEduList();
-                renderSkillTags();
-                updatePhotoDisplay();
-                updatePreview();
-                saveAllResumes();
+                data.work = []; data.education = []; data.skills = []; settings.photo = '';
+                syncFormFromData(); renderWorkList(); renderEduList(); renderSkillTags();
+                updatePhotoDisplay(); updatePreview(); saveAllResumes();
             }
         });
 
-        // 简历管理
-        els.resumeSelect.addEventListener('change', () => {
-            const newName = els.resumeSelect.value;
-            if (newName !== currentResumeName) {
-                switchToResume(newName);
-            }
-        });
-
+        els.resumeSelect.addEventListener('change', () => { if (els.resumeSelect.value !== currentResumeName) switchToResume(els.resumeSelect.value); });
         els.newBtn.addEventListener('click', () => {
-            const name = prompt('请输入新简历名称：');
-            if (!name) return;
-            if (allResumes[name]) {
-                alert('该名称已存在');
-                return;
-            }
-            allResumes[name] = {
-                settings: { template: 'classic', font: 'sans', photo: '' },
-                data: {
-                    basics: { name: '', title: '', email: '', phone: '', summary: '' },
-                    work: [],
-                    education: [],
-                    skills: []
-                }
-            };
-            switchToResume(name);
-            saveAllResumes();
+            const name = prompt('新简历名称：'); if (!name) return; if (allResumes[name]) { alert('已存在'); return; }
+            allResumes[name] = { settings: { template: 'classic', font: 'sans', photo: '' }, data: { basics: { name: '', title: '', email: '', phone: '', summary: '' }, work: [], education: [], skills: [] } };
+            switchToResume(name); saveAllResumes();
         });
-
         els.renameBtn.addEventListener('click', () => {
-            const oldName = currentResumeName;
-            const newName = prompt('请输入新名称：', oldName);
-            if (!newName || newName === oldName) return;
-            if (allResumes[newName]) {
-                alert('该名称已存在');
-                return;
-            }
-            allResumes[newName] = allResumes[oldName];
-            delete allResumes[oldName];
-            switchToResume(newName);
-            saveAllResumes();
+            const old = currentResumeName; const n = prompt('新名称：', old); if (!n || n === old) return; if (allResumes[n]) { alert('已存在'); return; }
+            allResumes[n] = allResumes[old]; delete allResumes[old]; switchToResume(n); saveAllResumes();
         });
-
         els.deleteBtn.addEventListener('click', () => {
-            if (Object.keys(allResumes).length <= 1) {
-                alert('至少保留一份简历');
-                return;
-            }
-            if (confirm(`确定删除简历「${currentResumeName}」吗？`)) {
-                delete allResumes[currentResumeName];
-                const firstName = Object.keys(allResumes)[0];
-                switchToResume(firstName);
-                saveAllResumes();
-            }
+            if (Object.keys(allResumes).length <= 1) { alert('至少保留一份'); return; }
+            if (confirm(`删除「${currentResumeName}」？`)) { delete allResumes[currentResumeName]; switchToResume(Object.keys(allResumes)[0]); saveAllResumes(); }
         });
     }
 
